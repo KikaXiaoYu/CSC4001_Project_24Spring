@@ -1,6 +1,6 @@
 if __name__ == "__main__":
     with open("./input.pig", "r") as f:
-        g = open("./1.out", "w") 
+        g = open("./1.out", "w")
         vars = dict()
         lines = f.readlines()
         for line in lines:
