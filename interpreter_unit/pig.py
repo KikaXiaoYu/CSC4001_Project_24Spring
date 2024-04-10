@@ -151,6 +151,7 @@ def doBranch(r_tokens_lst, r_vars, p_pc):
     tar_line = int(r_tokens_lst[1], 10)
     if (tar_line >= g_pig_size):
         print(f"Line {g_pc}: branching line {tar_line} is output of bound.")
+        raise (SystemExit)
     _, exp_value = expCalculation(r_tokens_lst[2:], r_vars)
     if (exp_value != 0b0):
         return tar_line - 1
@@ -193,10 +194,15 @@ if __name__ == "__main__":
     g_vars = dict()
     g_pc = 0
     g_output_count = 0
+    g_statement_count = 0
     # start interpreting
     if (g_pc < g_pig_size):
         g_line = g_pig_lines[g_pc]
     while (g_line and not (g_line.isspace())):
+        g_statement_count += 1
+        if (g_statement_count == 5001):
+            print("too-many-lines")
+            break
         # detecting statement type
         gw_tokens_lst = g_line.strip().split(" ")
         gw_statement_type = g_line[0]
