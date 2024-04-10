@@ -202,7 +202,7 @@ if __name__ == "__main__":
         g_statement_count += 1
         if (g_statement_count == 5001):
             print("too-many-lines")
-            break
+            raise (SystemExit)
         # detecting statement type
         gw_tokens_lst = g_line.strip().split(" ")
         gw_statement_type = g_line[0]
@@ -217,9 +217,9 @@ if __name__ == "__main__":
         elif (gw_statement_type == 'R'):
             doDestory(gw_tokens_lst, g_vars)
         else:
-            break
+            raise (SystemExit)
         g_pc += 1
         if (g_pc < g_pig_size):
             g_line = g_pig_lines[g_pc]
         else:
-            break
+            raise (SystemExit)
