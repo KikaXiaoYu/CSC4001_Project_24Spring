@@ -205,7 +205,7 @@ if __name__ == "__main__":
             raise (SystemExit)
         # detecting statement type
         gw_tokens_lst = g_line.strip().split(" ")
-        gw_statement_type = g_line[0]
+        gw_statement_type = gw_tokens_lst[0]
         if (gw_statement_type == 'D'):
             doDeclare(gw_tokens_lst, g_vars)
         elif (gw_statement_type == 'A'):
