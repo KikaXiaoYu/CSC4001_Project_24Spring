@@ -1,6 +1,7 @@
 
 
-def varBitTran(p_org_bit, p_tar_bit, p_value):
+def varBitTran(p_org_bit: int, p_tar_bit:
+               int, p_value: int) -> int:
     '''
     Given original bit number and target bit number
     return the transferred value w.r.t. bit
@@ -17,7 +18,8 @@ def varBitTran(p_org_bit, p_tar_bit, p_value):
         return (p_value & org_mask) & tar_mask
 
 
-def expADD(p_bit1, p_value1, p_bit2, p_value2):
+def expADD(p_bit1: int, p_value1: int,
+           p_bit2: int, p_value2: int) -> tuple:
     '''
     Given two values with bits
     return the ADD result bit and value
@@ -27,7 +29,8 @@ def expADD(p_bit1, p_value1, p_bit2, p_value2):
     return max_bit, varBitTran(max_bit, max_bit, (p_value1 + p_value2))
 
 
-def expSUB(p_bit1, p_value1, p_bit2, p_value2):
+def expSUB(p_bit1: int, p_value1: int,
+           p_bit2: int, p_value2: int) -> tuple:
     '''
     Given two values with bits
     return the SUB result bit and value
@@ -37,7 +40,8 @@ def expSUB(p_bit1, p_value1, p_bit2, p_value2):
     return max_bit, varBitTran(max_bit, max_bit, (p_value1 - p_value2))
 
 
-def expAND(p_bit1, p_value1, p_bit2, p_value2,):
+def expAND(p_bit1: int, p_value1: int,
+           p_bit2: int, p_value2: int) -> tuple:
     '''
     Given two values with bits
     return the AND result bit and value
@@ -47,7 +51,8 @@ def expAND(p_bit1, p_value1, p_bit2, p_value2,):
     return max_bit, (p_value1 & p_value2)
 
 
-def expOR(p_bit1, p_value1, p_bit2, p_value2):
+def expOR(p_bit1: int, p_value1: int,
+          p_bit2: int, p_value2: int) -> tuple:
     '''
     Given two values with bits
     return the OR result bit and value
@@ -57,7 +62,7 @@ def expOR(p_bit1, p_value1, p_bit2, p_value2):
     return max_bit, (p_value1 | p_value2)
 
 
-def expNOT(p_bit, p_value):
+def expNOT(p_bit: int, p_value: int) -> tuple:
     '''
     Given two values with bits
     return the NOT result bit and value
@@ -66,7 +71,7 @@ def expNOT(p_bit, p_value):
     return p_bit, varBitTran(p_bit, p_bit, ~p_value)
 
 
-def expCalculation(r_tokens_lst, r_vars):
+def expCalculation(r_tokens_lst: list, r_vars: dict) -> int:
     '''
     given tokens lst and variables
     return the result bit and value
@@ -118,7 +123,7 @@ def expCalculation(r_tokens_lst, r_vars):
             raise (SystemExit)
 
 
-def doDeclare(r_tokens_lst, r_vars):
+def doDeclare(r_tokens_lst: list, r_vars: dict) -> None:
     '''
     declare a var with bit saved to r_vars
     '''
@@ -131,9 +136,9 @@ def doDeclare(r_tokens_lst, r_vars):
     r_vars[var_name] = (var_bit, 0b0)
 
 
-def doAssign(r_tokens_lst, r_vars):
+def doAssign(r_tokens_lst: list, r_vars: dict) -> None:
     '''
-    assign a var with bit and values
+    assign a var with bit and values, saved in r_vars
     '''
     var_name = r_tokens_lst[1]
     if (var_name not in r_vars):
@@ -144,9 +149,9 @@ def doAssign(r_tokens_lst, r_vars):
     r_vars[var_name] = (var_bit, varBitTran(exp_bit, var_bit, exp_value))
 
 
-def doBranch(r_tokens_lst, r_vars, p_pc):
+def doBranch(r_tokens_lst: list, r_vars: dict, p_pc: int) -> int:
     '''
-    branch with exp
+    branch with exp and return the pc (prev, then should be add by 1)
     '''
     tar_line = int(r_tokens_lst[1], 10)
     if (tar_line >= g_pig_size):
@@ -159,9 +164,9 @@ def doBranch(r_tokens_lst, r_vars, p_pc):
         return p_pc
 
 
-def doOutput(r_tokens_lst, r_vars, r_file_out):
+def doOutput(r_tokens_lst: list, r_vars: dict, r_file_out) -> None:
     '''
-    output variable 
+    output variable to r_file_out
     '''
     var_name = r_tokens_lst[1]
     if (var_name not in r_vars):
@@ -172,9 +177,9 @@ def doOutput(r_tokens_lst, r_vars, r_file_out):
     print(f"{var_value:0{var_bit}b}", file=r_file_out)
 
 
-def doDestory(r_tokens_lst, r_vars):
+def doDestory(r_tokens_lst: list, r_vars: dict) -> None:
     '''
-    destory a variable
+    destory a variable, removed from r_vars
     '''
     var_name = r_tokens_lst[1]
     if (var_name not in r_vars):
