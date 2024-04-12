@@ -17,3 +17,5 @@ if __name__ == "__main__":
         var_name = f"v00{i}"
         stmt = f"O {var_name}"
         print(stmt, file=f)
+
+    

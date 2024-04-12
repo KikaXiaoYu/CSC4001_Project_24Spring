@@ -149,12 +149,12 @@ def doAssign(r_tokens_lst: list, r_vars: dict) -> None:
     r_vars[var_name] = (var_bit, varBitTran(exp_bit, var_bit, exp_value))
 
 
-def doBranch(r_tokens_lst: list, r_vars: dict, p_pc: int) -> int:
+def doBranch(r_tokens_lst: list, r_vars: dict, p_pc: int, p_pig_size) -> int:
     '''
     branch with exp and return the pc (prev, then should be add by 1)
     '''
     tar_line = int(r_tokens_lst[1], 10)
-    if (tar_line >= g_pig_size):
+    if (tar_line >= p_pig_size):
         print(f"Line {g_pc}: branching line {tar_line} is output of bound.")
         raise (SystemExit)
     _, exp_value = expCalculation(r_tokens_lst[2:], r_vars)
@@ -216,7 +216,7 @@ if __name__ == "__main__":
         elif (gw_statement_type == 'A'):
             doAssign(gw_tokens_lst, g_vars)
         elif (gw_statement_type == 'B'):
-            g_pc = doBranch(gw_tokens_lst, g_vars, g_pc)
+            g_pc = doBranch(gw_tokens_lst, g_vars, g_pc, g_pig_size)
         elif (gw_statement_type == 'O'):
             doOutput(gw_tokens_lst, g_vars, g_file_out)
         elif (gw_statement_type == 'R'):
