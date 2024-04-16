@@ -204,6 +204,7 @@ if __name__ == "__main__":
     if (g_pc < g_pig_size):
         g_line = g_pig_lines[g_pc]
     while (g_line and not (g_line.isspace())):
+        # print(g_pc)
         g_statement_count += 1
         if (g_statement_count == 5001):
             print("too-many-lines")
