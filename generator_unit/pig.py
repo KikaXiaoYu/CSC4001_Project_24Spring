@@ -207,7 +207,7 @@ if __name__ == "__main__":
         # print(g_pc)
         g_statement_count += 1
         if (g_statement_count == 5001):
-            print("too-many-lines")
+            print("too-many-lines", file=g_file_out)
             raise (SystemExit)
         # detecting statement type
         gw_tokens_lst = g_line.strip().split(" ")
@@ -217,6 +217,7 @@ if __name__ == "__main__":
         elif (gw_statement_type == 'A'):
             doAssign(gw_tokens_lst, g_vars)
         elif (gw_statement_type == 'B'):
+            # print(g_pc, g_vars["v848"])
             g_pc = doBranch(gw_tokens_lst, g_vars, g_pc, g_pig_size)
         elif (gw_statement_type == 'O'):
             doOutput(gw_tokens_lst, g_vars, g_file_out)
