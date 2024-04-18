@@ -2,7 +2,7 @@
 import random
 
 g_var_type = ("bv8", "bv16", "bv32", "bv64")
-g_max_line_num = 100
+g_max_line_num = 700
 g_max_iter = 4
 g_max_block_dec = 10
 g_max_block_output = 10
@@ -78,7 +78,7 @@ def genOutputBlock(p_cur_line_num: int, r_var_dec_set: set, r_res_lst: list):
     return output_var_count
 
 
-def genAssignBlock(p_cur_line_num: int, r_var_dec_set: set,
+def genAssignBlock(p_cur_line_num: int, r_var_dec_set: set, r_var_frz_set: set,
                    r_res_lst: list):
     '''
     randomly assign lines based on var declared
@@ -90,8 +90,9 @@ def genAssignBlock(p_cur_line_num: int, r_var_dec_set: set,
 
     # randomly generate assign number
     assign_var_count = random.randint(
-        0, min(g_max_block_output, cur_max_cap // 2, len(r_var_dec_set)))
-    assign_var_set = random.sample(list(r_var_dec_set), assign_var_count)
+        0, min(g_max_block_output, cur_max_cap // 2, len(r_var_dec_set - r_var_frz_set)))
+    assign_var_set = random.sample(
+        list(r_var_dec_set - r_var_frz_set), assign_var_count)
 
     # generate output lines
     for assign_var_name in assign_var_set:
@@ -103,7 +104,7 @@ def genAssignBlock(p_cur_line_num: int, r_var_dec_set: set,
     return assign_var_count
 
 
-def genIfBlock(p_cur_line_num: int, r_var_dec_set: set,
+def genIfBlock(p_cur_line_num: int, r_var_dec_set: set, r_var_frz_set: set,
                r_res_lst: list, p_rec_iter: int):
     '''
     if block is formed as:
@@ -148,7 +149,7 @@ def genIfBlock(p_cur_line_num: int, r_var_dec_set: set,
     B_line_num = len(r_res_lst)
     r_res_lst.append(" ")
     if_block_line_num = genBasicBlock(
-        p_cur_line_num+4, (r_var_dec_set | new_var_dec_set), r_res_lst, p_rec_iter+1)
+        p_cur_line_num+4, (r_var_dec_set | new_var_dec_set), r_var_frz_set, r_res_lst, p_rec_iter+1)
 
     # modify branch
     tar_line_num = B_line_num + 1 + if_block_line_num
@@ -158,7 +159,6 @@ def genIfBlock(p_cur_line_num: int, r_var_dec_set: set,
         r_res_lst[B_line_num] = f"B {tar_line_num:03d} ( {new_var_name} )"
     else:  # expression
         r_res_lst[B_line_num] = f"B {tar_line_num:03d} {exp_str}"
-    print(f"if+block_line_num {if_block_line_num} from {B_line_num+1} to {tar_line_num}")
     # add destory
     line_str = f"R {new_var_name}"
     r_res_lst.append(line_str)
@@ -166,7 +166,7 @@ def genIfBlock(p_cur_line_num: int, r_var_dec_set: set,
     return (4 + if_block_line_num)
 
 
-def genForBlock(p_cur_line_num: int, r_var_dec_set: set,
+def genForBlock(p_cur_line_num: int, r_var_dec_set: set, r_var_frz_set: set,
                 r_res_lst: list, p_rec_iter: int):
     '''
     for block is formed as:
@@ -194,6 +194,7 @@ def genForBlock(p_cur_line_num: int, r_var_dec_set: set,
     new_var_type = g_var_type[random.randint(0, 3)]
     line_str = f"D {new_var_type} {new_var_name}"
     r_res_lst.append(line_str)
+    r_var_frz_set.add(new_var_name)
 
     # assign
     exp_str = genExpression(
@@ -204,10 +205,16 @@ def genForBlock(p_cur_line_num: int, r_var_dec_set: set,
 
     # basic block
     for_block_line_num = genBasicBlock(
-        p_cur_line_num+5, (r_var_dec_set | new_var_dec_set), r_res_lst, p_rec_iter+1)
+        p_cur_line_num+5, (r_var_dec_set | new_var_dec_set), r_var_frz_set, r_res_lst, p_rec_iter+1)
 
     # add assign minus
-    exp_str = f"( ( {new_var_name} ) - ( 00000001 ) )"
+    decis_num = random.randint(0, 8)
+    if decis_num != 0:
+        exp_str = f"( ( {new_var_name} ) - ( 00000001 ) )"
+    else:
+        ext_exp = genExpression(
+            (0, 3), (0, 3), (0, 3), r_var_dec_set, 0)
+        exp_str = f"( ( {new_var_name} ) - {ext_exp} )"
     line_str = f"A {new_var_name} {exp_str}"
     r_res_lst.append(line_str)
 
@@ -219,10 +226,12 @@ def genForBlock(p_cur_line_num: int, r_var_dec_set: set,
     line_str = f"R {new_var_name}"
     r_res_lst.append(line_str)
 
+    r_var_frz_set.remove(new_var_name)
+
     return (5 + for_block_line_num)
 
 
-def genBasicBlock(p_cur_line_num: int, r_var_dec_set: set,
+def genBasicBlock(p_cur_line_num: int, r_var_dec_set: set, r_var_frz_set: set,
                   r_res_lst: list, p_rec_iter: int):
     '''
     recursively generate lines saved in res_lst
@@ -241,40 +250,47 @@ def genBasicBlock(p_cur_line_num: int, r_var_dec_set: set,
         if (new_var_name not in r_var_dec_set):
             new_var_dec_set.add(new_var_name)
             cur_var_num += 1
+    new_var_dec_num = len(new_var_dec_set)
+    # the stage results are dec_set and dec_num (correct)
 
     new_line_num = 0
+    new_line_num += 2 * new_var_dec_num
 
     # generate declaration lines
     for new_var_name in new_var_dec_set:
         new_var_type = g_var_type[random.randint(0, 3)]
         line_str = f"D {new_var_type} {new_var_name}"
         r_res_lst.append(line_str)
-    new_line_num += 2 * new_var_dec_num
 
     for _ in range(g_max_sub_block_num):
         decis_dir = random.randint(0, 4)
         if (decis_dir == 0):
             new_line_num += genBasicBlock(p_cur_line_num + new_line_num,
-                                          (r_var_dec_set | new_var_dec_set), r_res_lst, p_rec_iter+1)
-            print( '\t' * (p_rec_iter+1) + f" basic new_line_num {new_line_num}")
-        # elif (decis_dir == 1):
-        #     new_line_num += genOutputBlock(p_cur_line_num + new_line_num,
-                                        #    (r_var_dec_set | new_var_dec_set), r_res_lst)
-            # print(f"\toutput new_line_num {new_line_num}")
-        # elif (decis_dir == 2):
-        #     new_line_num += genAssignBlock(p_cur_line_num + new_line_num,
-        #                                    (r_var_dec_set | new_var_dec_set), r_res_lst)
-        #     print(f"\tassign new_line_num {new_line_num}")
+                                          (r_var_dec_set | new_var_dec_set),
+                                          r_var_frz_set,
+                                          r_res_lst,
+                                          p_rec_iter+1)
+        elif (decis_dir == 1):
+            new_line_num += genOutputBlock(p_cur_line_num + new_line_num,
+                                           (r_var_dec_set | new_var_dec_set),
+                                           r_res_lst)
+        elif (decis_dir == 2):
+            new_line_num += genAssignBlock(p_cur_line_num + new_line_num,
+                                           (r_var_dec_set | new_var_dec_set),
+                                           r_var_frz_set,
+                                           r_res_lst)
         elif (decis_dir == 3):
             new_line_num += genIfBlock(p_cur_line_num + new_line_num,
-                                       (r_var_dec_set | new_var_dec_set), r_res_lst,
+                                       (r_var_dec_set | new_var_dec_set),
+                                       r_var_frz_set,
+                                       r_res_lst,
                                        p_rec_iter+1)
-            print( '\t' * (p_rec_iter+1) + f" if new_line_num {new_line_num}")
-        # elif (decis_num == 4):
-        #     new_line_num += genForBlock(p_cur_line_num + new_line_num,
-        #                                 (r_var_dec_set | new_var_dec_set), r_res_lst,
-        #                                 p_rec_iter+1)
-    print( '\t' * (p_rec_iter) + f" total new_line_num {new_line_num}")
+        elif (decis_dir == 4):
+            new_line_num += genForBlock(p_cur_line_num + new_line_num,
+                                        (r_var_dec_set | new_var_dec_set),
+                                        r_var_frz_set,
+                                        r_res_lst,
+                                        p_rec_iter+1)
 
     # generate destory lines
     for new_var_name in new_var_dec_set:
@@ -287,7 +303,8 @@ def genBasicBlock(p_cur_line_num: int, r_var_dec_set: set,
 def genLineStrToLst():
     res_lst = []
     var_dec_set = set()
-    genBasicBlock(0, var_dec_set, res_lst, 0)
+    var_frz_set = set()
+    genBasicBlock(0, var_dec_set, var_frz_set, res_lst, 0)
     return res_lst
 
 

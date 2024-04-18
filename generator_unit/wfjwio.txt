@@ -1,51 +1,59 @@
-                                         basic new_line_num 10
-                                         basic new_line_num 10
-                                         basic new_line_num 10
-                                         if new_line_num 10
-                                         basic new_line_num 10
-                                 total new_line_num 10
-if+block_line_num 10 from 17 to 27
-                         if new_line_num 26
-                                         if new_line_num 6
-                                         basic new_line_num 6
-                                         basic new_line_num 6
-                                 total new_line_num 6
-if+block_line_num 6 from 31 to 37
-                         if new_line_num 36
-                                         basic new_line_num 18
-                                         if new_line_num 18
-                                 total new_line_num 18
-if+block_line_num 18 from 41 to 59
-                         if new_line_num 58
-if+block_line_num 0 from 65 to 65
-                                 if new_line_num 8
-                                         if new_line_num 18
-                                         basic new_line_num 18
-                                         basic new_line_num 18
-                                         basic new_line_num 18
-                                         basic new_line_num 18
-                                 total new_line_num 18
-                                 basic new_line_num 26
-                                 if new_line_num 26
-                                         basic new_line_num 0
-                                         basic new_line_num 0
-                                         if new_line_num 0
-                                         if new_line_num 0
-                                         basic new_line_num 0
-                                         basic new_line_num 0
-                                 total new_line_num 0
-                                 basic new_line_num 26
-                         total new_line_num 26
-                         basic new_line_num 84
-                 total new_line_num 84
-if+block_line_num 84 from 8 to 92
-         if new_line_num 98
-                 basic new_line_num 2
-                 if new_line_num 2
-                 if new_line_num 2
-                 if new_line_num 2
-         total new_line_num 2
-         basic new_line_num 100
- total new_line_num 100
-Line 92: variable v535 has not been declared.
-Invalid Input
+basic_line_num (x2): 2, starting from 0
+        basic_line_num (x2): 8, starting from 1
+                # basic_line_num (x2): 12, starting from 5
+                        # if_line_num (basic): 4, starting from 11
+                                # basic_line_num (x2): 0, starting from 14
+                                # total new_line_num 0, starting from 14 to 14
+
+                        # if_line_num (total): 4, starting from 11 to 15
+
+                        # if_line_num (basic): 4, starting from 15
+                                # basic_line_num (x2): 20, starting from 18
+                                # total new_line_num 20, starting from 18 to 36
+
+                        # if_line_num (total): 24, starting from 15 to 37
+
+                        # if_line_num (basic): 4, starting from 37
+                        #         basic_line_num (x2): 4, starting from 40
+                        #         total new_line_num 4, starting from 40 to 44
+
+                        # if_line_num (total): 8, starting from 37 to 45
+
+                total new_line_num 48, starting from 5 to 51
+
+                # if_line_num (basic): 4, starting from 51
+                        # basic_line_num (x2): 4, starting from 54
+                                # if_line_num (basic): 4, starting from 56
+                                # if_line_num (total): 4, starting from 56 to 60
+
+                                # if_line_num (basic): 4, starting from 60
+                                # if_line_num (total): 4, starting from 60 to 64
+
+                                # basic_line_num (x2): 10, starting from 64
+                                # total new_line_num 10, starting from 64 to 74
+
+                                # basic_line_num (x2): 6, starting from 74
+                                # total new_line_num 6, starting from 74 to 80
+
+                                # basic_line_num (x2): 2, starting from 80
+                                # total new_line_num 2, starting from 80 to 82
+
+                                # if_line_num (basic): 4, starting from 82
+                                # if_line_num (total): 4, starting from 82 to 86
+
+                        # total new_line_num 34, starting from 54 to 88
+
+                if_line_num (total): 38, starting from 51 to 89
+
+                # basic_line_num (x2): 0, starting from 89
+                #         basic_line_num (x2): 2, starting from 89
+                #                 basic_line_num (x2): 2, starting from 90
+                #                 total new_line_num 2, starting from 90 to 92
+
+                #         total new_line_num 4, starting from 89 to 93
+
+                total new_line_num 4, starting from 89 to 93
+
+        total new_line_num 98, starting from 1 to 97
+
+total new_line_num 100, starting from 0 to 98
