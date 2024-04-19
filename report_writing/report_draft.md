@@ -171,9 +171,126 @@ In order to simplify our explanation, we simply say "CONSTANT" and "VAR" types h
 
 Firstly, we judge whether the tokens number is equal to 3. If yes, then it must be a CONSTANT or VAR, this judgement is easy, and we return the value based on CONSTANT value or VAR value.
 
-Secondly, 
+Secondly, if we detect that the second token is "NOT", we conclude that this is a NOT type, and hence do NOT with Exp, where Exp can be calculated recursively. 
+
+Thirdly, the type must be "Bop" if the PIG code is correct. Similarly, we calculate the value for Exp1 and Exp2 recursively and return the result.
+
+The algorithm for calculating Exp can be:
+
+```python
+expCalculation {
+	if (len(tokens) == 3):
+    	if CONSTANT:
+    		do res = CONSTANT calculation
+    		return res
+   		else:
+    		do res = VAR calculation
+    		return res
+    elif (judge NOT):
+    	do Exp calculation
+    	res = NOT Exp
+    	return res
+    else:
+    	do Exp1 and Exp2 calculation
+    	res = Exp1 Bop Exp2
+    	return res
+}
+```
+
+The remaining things are about the bit transforming and some bit operations, which are simple, hence omitted here.
+
+#### Conclusion
+
+After finishing all things above, the algorithm for the whole process can be given as:
+
+```python
+while (new_line is ok) {
+    if exceeding 5000:
+    	break
+    else:
+    	get type of statement
+    	do corresponding things
+    	update pc value
+}
+```
+
+The code can correctly read `input.pig` and output the result to `1.out`.
+
+## Metamorphic Testing
+
+还没做
 
 
 
-## 
+## Dataflow Analysis
 
+### Dataflow Analysis Overview
+
+The dataflow analysis can be used for detecting some features of a code. Specifically, we can use **Reaching Definitions Analysis** to detect the potential undeclared variables in a program by adding the dummy variables in the beginning.
+
+The algorithm of Reaching Definitions Analysis is shown below:
+
+```python
+INPUT: CFG (kill_B and gen_B computed)
+OUTPUT: IN[B] and OUT[B] for each basic block B
+    OUT[entry] = empty set
+    for each basic block B except entry:
+        OUT[B] = empty set
+    while (changes to any OUT occur):
+        for each basic block B except entry:
+            IN[B] = U_P a predecessor of B OUT[P]
+            OUT[B] = gen_B U (IN[B] - kill_B)
+```
+
+Use this algorithm, we do reaching definitions analysis on the PIG code, and the result where dummy variables have not been killed should be the potential undeclared variables. And if the basic block uses these variables, the corresponding line will be considered as using of undefined variable in PIG code.
+
+### Implementing DA program
+
+The program includes three main parts: 1. constructing the Control flow graph, 2. do reaching definition analysis, 3. do undeclared variable detection.
+
+#### Implementing CFG Constructing
+
+We need to determine the leaders in a sequence of three-address instructions of P and build the basic blocks.
+
+For determining the leaders, we consider:
+
+1. The first instruction in P is a leader
+2. Any target instruction of a conditional or unconditional jump (in PIG code, is the branching statement) is a leader
+3. Any instruction that immediately follows a conditional or unconditional jump is a leader
+
+After determining all the leaders, we create basic blocks, including the entry and exit blocks (for efficient usage). Then we construct the edges between each block and finally make it a graph-like structure.
+
+Here we just consider each blocks' end line. If this line is not a "B" statement, then it only goes to the next block. Otherwise, it goes to both the next block and the target block of the branching statement. We can also get all the **predecessors** of every block.
+
+Finally, the CFG result should be structured like:
+
+```python
+blocks_res = [
+    [(start_line, end_line), 
+    prev_block (),
+    OUT [0]^1000 concat [0]^declare_size (low to high)
+    ],
+    ...
+] (idx is the block idx)
+
+declare_res = [
+    (line, var),
+    ...
+] (idx is the bit idx)
+```
+
+Note that the OUT integer is constructed by 1000 zeros and declare_size zeros from lower bit to higher bit. The declare_res is just used for determine the line and variables declared corresponding to a fixed index in the OUT.
+
+#### Doing Reaching Definition Analysis
+
+Then we can do reaching definitions analysis, we let the entry's OUT be 1000 ones bits so that the dummy variables are represented for from v000 to v999. After the reaching definitions analysis, the OUT for each block should be changed.
+
+In details, it goes through each lines of one block and detect the declared variables (gen_B) from "D" statement, and detect the destroyed variables (kill_B) from "R" statement. At the end, we get the new OUTPUT of the block. We update until all OUTPUT remains the same.
+
+#### Detecting Undeclared Variables
+
+Finally, we execute each block again with known input. Similar to the analysis, but we additionally detect all variables to be used from "A", "B", "O", "R" statements. If the input has a dummy variable but we use that variable in our block, we conclude that line uses undefined variables. We store the information and finally output the number of lines.
+
+## Project Conclusion
+
+This project is really wonderful. I learned how to use differential testing and metamorphic testing to detect bugs and how to use dataflow analysis to detect some code bugs. These things are useful.
