@@ -1,6 +1,8 @@
 # CSC4001 Project Report
 
-> **Author:** Ziyu XIE (谢子钰)	**Student ID:** 121090642	
+> **Author:** Ziyu XIE (谢子钰)	**Student ID:** 121090642
+>
+> I have finished all the parts including **bonus**.
 
 ## Differential Testing
 
@@ -218,9 +220,137 @@ The code can correctly read `input.pig` and output the result to `1.out`.
 
 ## Metamorphic Testing
 
-还没做
+### Metamorphic Testing Overview
 
+The Project requires us to use differential testing to detect bugs of some buggy interpreters. We use `gen_meta.py` to generate two inputs (`input1.pig` and `input2.pig`) which can realize specific functions to the buggy interpreter and use `checker.py` to check whether there are some bugs.
 
+### Implementing the Generator and Checker
+
+Since the PIG language contains five kinds of statement "D", "A", "B", "O", "R", we can check the functions of them separately. We firstly identify which kind of bug they may occur. 
+
+<u>For "D" statement, the possible bugs are:</u>
+
+1. Do not declare the correct variable
+2. Do not initialize the variable with zero
+3. Do not declare with the correct type
+
+<u>For "R" statement, the possible bugs are:</u>
+
+1. Do not destroy the correct variable
+
+<u>For "O" statement, the possible bugs are:</u>
+
+1. Do not output
+2. Output the wrong variable
+3. Output the variable value but with wrong type
+
+<u>For "A" statement, the possible bugs are:</u>
+
+1. Wrong calculation of expressions
+2. Assign to wrong variables
+
+<u>For "B" statement, the possible bugs are:</u>
+
+1. Do not do the determination of branching correctly
+2. branch to the wrong lines
+
+In order to test these bugs, I designed four checking blocks, including "checkDsRs", "checkOs", "checkAsExps", and "checkBs".
+
+#### Idea of "checkDsRs"
+
+This part is used to check the "D" and "R" statements. In order to check whether the variables are declared and destroyed correctly, we use some variables to do D and R multiple times. Do output directly and then do assign-output. So that these variables should be output 0 first, then be output many different values. The checker is designed consistent with this part. The structure of this part PIG code is:
+
+```python
+DOUBLE TIME:
+    D (many lines)
+    O (many lines)
+    A (many lines)
+    O (many lines)
+    R (many lines)
+    
+# two files have different var name but same value
+```
+
+#### Idea of "checkOs"
+
+This part, we just assign variables with different kinds of values  and types, then do the output. Each time we choose different types but the same value to assign, hence the output must be **different**. If there is something consistent, then there is a bug. The structure of this part PIG code is:
+
+```python
+MANY TIMES:
+	D type1 or type2 var
+	A var values
+	O var
+	R var
+    
+# two files have different type1 or type2
+```
+
+#### Idea of "checkAsExps"
+
+The idea is that we assign different expressions to the variable and check whether Bops and NOT works well, in addition with assigning. For example, we give `A var ( Exp1 + Exp2 )` to file 1, and give `A var ( {result of Exp1 + Exp2} )`, which should give the same answer. The structure of this part PIG code is:
+
+```python
+# file one
+D (many variables for usage)
+MANY TIMES:
+	D (testing variable)
+	A var ( Exp1 + Exp2 )
+	O var
+	A var ( Exp1 - Exp2 )
+	O var
+	A var ( Exp1 & Exp2 )
+	O var
+	A var ( Exp1 | Exp2 )
+	O var
+	A var ( ! Exp1 )
+	O var
+R (many variables for usage)	
+```
+
+```python
+# file two
+D (many variables for usage)
+MANY TIMES:
+	D (testing variable)
+	A var ( {result of Exp1 + Exp2} )
+	O var
+	A var (  {result of Exp1 - Exp2} )
+	O var
+	A var (  {result of Exp1 & Exp2} )
+	O var
+	A var (  {result of Exp1 | Exp2} )
+	O var
+	A var (  {result of ! Exp1} )
+	O var
+R (many variables for usage)	
+```
+
+#### Idea of "checkBs"
+
+We want to test whether the branch works well or not, we consider the structure below:
+
+```python
+A var 0
+B LINE:4 Exp1
+A var Exp2
+O var
+```
+
+And for the second file, we consider it has branched correctly:
+
+```python
+A var 0
+(A var Exp2) if Exp1 == 0
+O var
+```
+
+If the branch is working well, then the output should be the same for var.
+
+We do this for multiple times and get the result.
+
+#### Conclusion
+
+For the checker, the first, third, and fourth parts should be exactly the same, while the second part must be different. The checker use this logic to test. Finally, we store the result in `res.out` file.
 
 ## Dataflow Analysis
 

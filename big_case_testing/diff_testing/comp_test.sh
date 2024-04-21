@@ -1,11 +1,11 @@
 # set -x
-
+echo "" > WuYueYan_res.txt
 for i in $(seq 1 1000); do
 
     # generating input.pig
     cat  inte_cases/xiaoyu_$i.pig > input.pig
     python3 pig_WuYueyan.py
-    echo "testing $i"
+    echo -n "testing $i: "
     diff 1.out inte_cases/xiaoyu_$i.out
     if [ $? -eq 0 ]; then
         echo "No bug detected."
@@ -15,3 +15,5 @@ for i in $(seq 1 1000); do
     fi
 
 done
+
+
