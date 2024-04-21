@@ -1,8 +1,8 @@
-for j in $(seq 2 3); do
+for j in $(seq 0 3); do
     for i in $(seq 1 100); do
         python3 gen_meta.py
-        buggy_interpreters/pig$j.exe <input1.pig >1.out
-        buggy_interpreters/pig$j.exe <input2.pig >2.out
+        buggy_interpreters/pig$j <input1.pig >1.out
+        buggy_interpreters/pig$j <input2.pig >2.out
         python3 pig_formeta.py
 
         python3 checker.py
