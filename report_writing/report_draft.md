@@ -122,7 +122,7 @@ The IF Block will know (passed by parameters):
 The FOR Block is structured as below:
 
 ```python
-IF_BLOCK (
+FOR_BLOCK (
     ''' creating iteration variable '''
     D TYPE VAR1
     A VAR1 Exp
@@ -136,11 +136,13 @@ IF_BLOCK (
 )
 ```
 
-The IF Block will know (passed by parameters):
+The FOR Block will know (passed by parameters):
 
 1. how many lines have been generated,
 2. which variables have been declared,
 3. which variables should not be used here.
+
+In addition, since the FOR BLOCK uses an iteration number, this variable should not be assigned during this process. That is why many blocks must know "which variables should not be used here".
 
 #### Expression Structure
 
