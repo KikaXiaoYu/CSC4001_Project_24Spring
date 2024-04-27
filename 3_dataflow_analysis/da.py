@@ -321,13 +321,17 @@ def doUnDeclareDetection(r_pig_lines: list, r_blocks_res: list,
                 cur_def = doDestroy(
                     cur_def, i, tokens_lst, r_declares_res)
             else:
+                flg = 0
                 if (statement_type == 'A'):
                     used_var_lst = getAssignVar(tokens_lst)
+                    flg = 1
                 elif (statement_type == 'B'):
                     used_var_lst = getBranchVar(tokens_lst)
+                    flg = 1
                 elif (statement_type == 'O'):
                     used_var_lst = getOutputVar(tokens_lst)
-                if (isLineUndeclared(used_var_lst, cur_def)):
+                    flg = 1
+                if (flg == 1 and isLineUndeclared(used_var_lst, cur_def)):
                     undc_lines_res.append(i)
                     undc_num += 1
     return undc_lines_res, undc_num
@@ -345,4 +349,5 @@ if __name__ == '__main__':
     # detect undelcared variables
     g_undc_lines, g_undc_num = doUnDeclareDetection(
         g_pig_lines, g_blocks_res, g_declares_res)
+    # print(g_undc_lines)
     print(g_undc_num, end='')
