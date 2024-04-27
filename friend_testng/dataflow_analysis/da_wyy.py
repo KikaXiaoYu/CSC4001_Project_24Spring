@@ -6,8 +6,9 @@ def find_leaders(instructions):
     n = len(instructions)
     leaders.add(0)  # 第一条指令总是领导者
     for i in range(n):
+        # print(i,":",instructions[i])
         if 'B' in instructions[i]:  # 假设'B'表示分支
-            target = int(instructions[i].split()[1])-1
+            target = int(instructions[i].split()[1])
             leaders.add(target)
             if i + 1 < n:#这里要不要哦+1呢不确定
                 leaders.add(i+1)
@@ -27,6 +28,7 @@ def build_blocks(instructions, leaders):
         current_block.append(instr)
     if current_block:
         blocks[current_leader] = current_block
+    # print(blocks)
     return blocks
 
 def build_cfg(blocks, instructions):
@@ -87,13 +89,17 @@ def compute_gen_kill(blocks, definitions):
 
 def analyze_dataflow(blocks, cfg, definitions):
     # 分析数据流，计算每个基本块的 IN 和 OUT 集合
-    in_out = {block: {'in': None, 'out': None} for block in blocks}
+    in_out = {block: {'in': {var: False for var in definitions}, 'out': None} for block in blocks}
     # 初始化第一个block的IN集为全0状态
-    in_out[next(iter(blocks))]['in'] = {var: False for var in definitions}
-
+    in_sets = [in_out[block]['in'] for block in blocks]
+    in_set = {var: False for var in definitions} if in_sets else {var: False for var in definitions}
+    
     changed = True
     while changed:
         changed = False
+        for block in blocks:
+            gen_kill_block = compute_gen_kill({block: blocks[block]}, in_set)
+            out_set = gen_kill_block[block]['out']
         for block in blocks:
             # 计算IN集
             if block != next(iter(blocks)):  # 如果不是第一个块
@@ -112,7 +118,10 @@ def analyze_dataflow(blocks, cfg, definitions):
 
     return in_out
 
-def count_undeclared_variables(blocks, in_out):
+
+
+
+def count_undeclared_variables(blocks, in_out,instructions):
     # 计算可能使用了未声明变量的行数
     undefined_use_count = 0
     undeclared_uses = set()
@@ -140,7 +149,7 @@ def count_undeclared_variables(blocks, in_out):
                     # if token.startswith('v'):
                     if token not in local_defs or local_defs[token] == False:
                         undefined_use_count += 1
-                        undeclared_uses.add((instr, block))
+                        undeclared_uses.add((instr, block+i))
                         break
 
             elif command == 'B':  # 条件跳转
@@ -156,7 +165,7 @@ def count_undeclared_variables(blocks, in_out):
                     # if token.startswith('v'):
                     if token not in local_defs or local_defs[token] == False:
                         undefined_use_count += 1
-                        undeclared_uses.add((instr, block))
+                        undeclared_uses.add((instr, block+i))
                         
                         break
             
@@ -164,7 +173,7 @@ def count_undeclared_variables(blocks, in_out):
                 token = parts[1]
                 if token not in local_defs or local_defs[token] == False:
                         undefined_use_count += 1
-                        undeclared_uses.add((instr, block))
+                        undeclared_uses.add((instr, block+i))
                         
             # 根据指令更新定义状态
             elif command == 'D':
@@ -172,15 +181,16 @@ def count_undeclared_variables(blocks, in_out):
 
             elif command == 'R' :
                 # print(block,"localR",local_defs)
-                if token not in local_defs or local_defs[parts[1]] == False:
+                if parts[1] not in local_defs or local_defs[parts[1]] == False:
                     undefined_use_count += 1
-                    undeclared_uses.add((instr, block))
+                    undeclared_uses.add((instr, block+i))
                 elif local_defs[parts[1]] == True:
                     local_defs[parts[1]] = False
                     
     sorted_tuples = sorted(undeclared_uses, key=sort_by_block)
     # for line, block in sorted_tuples:
-        # print(block,":",line)
+    #     print(line)
+
     return len(undeclared_uses)
 
 def sort_by_block(element):
@@ -222,7 +232,7 @@ def main():
     in_out = analyze_dataflow(blocks, cfg, definitions)
     # print(in_out)
     # 计算使用了未声明变量的行数
-    undeclared_count = count_undeclared_variables(blocks, in_out)
+    undeclared_count = count_undeclared_variables(blocks, in_out,instructions)
     # print("Number of lines with undeclared variable use:", undeclared_count)
 
     # 输出结果
