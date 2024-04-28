@@ -1,18 +1,19 @@
+# set -x
 echo "" > $1_res.txt
 for i in $(seq 1 1000); do
 
     # generating input.pig
-    echo -n "testing for $i. "
-    cat dataflow_cases/xiaoyu_$i.pig > input.pig
-    # python3 da_$1.py < input.pig > 1.out
-    python3 da_$1.py < input.pig
-
-    cat dataflow_cases/xiaoyu_$i.out > 2.out
-    diff 1.out 2.out -q
+    cat  inte_cases/xiaoyu_$i.pig > input.pig
+    python3 pig_$1.py
+    echo -n "testing $i: "
+    diff 1.out inte_cases/xiaoyu_$i.out -q
     if [ $? -eq 0 ]; then
         echo "No bug detected."
     else
         echo "Bug is detected during iter $i."
         echo "$i " >> $1_res.txt
     fi
+
 done
+
+

@@ -345,4 +345,5 @@ if __name__ == '__main__':
     # detect undelcared variables
     g_undc_lines, g_undc_num = doUnDeclareDetection(
         g_pig_lines, g_blocks_res, g_declares_res)
+    print(g_undc_lines)
     print(g_undc_num, end='')

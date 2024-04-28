@@ -4,7 +4,7 @@ for i in $(seq 1 1000); do
     # generating input.pig
     echo -n "testing for $i. "
     cat inte_cases/xiaoyu_$i.pig > input.pig
-    python3 pig_mtf.py
+    python3 pig_$1.py
 
     cat inte_cases/xiaoyu_$i.out > 2.out
     diff 1.out 2.out -q
